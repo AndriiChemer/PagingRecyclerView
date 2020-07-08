@@ -3,8 +3,11 @@ package com.artatech.inkbook.customrecyclerview.custom
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.artatech.inkbook.customrecyclerview.R
@@ -24,39 +27,72 @@ class PagingRecyclerView @JvmOverloads constructor(
 //        defStyleRes: Int)
 //            : super(context, attrs, defStyleAttr, defStyleRes)
 
+    private var colorControlNormal: Int = R.color.colorGreyDisable
     private var adapter: GeneralAdapterListener? = null
 
-    val listener = object : PagingAdapter.Listener {
+    val listener = object : PagingAdapter.PagingListener {
         @SuppressLint("SetTextI18n")
         override fun updatePageInfo(currentPage: Int, totalPage: Int) {
             currentPageTextView.text = "$currentPage/$totalPage"
         }
 
+        override fun toggleButtons(currentPage: Int, lastPage: Int) {
+            when (currentPage) {
+                lastPage -> {
+                    val drawableRight = ContextCompat.getDrawable(context, R.drawable.ic_arrow_right_disable)
+                    nextButton.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableRight, null)
+                    nextButton.setTextColor(ContextCompat.getColor(context, R.color.colorGreyDisable))
+                }
+                1 -> {
+                    val drawableLeft = ContextCompat.getDrawable(context, R.drawable.ic_arrow_left_disable)
+                    previewButton.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, null, null)
+                    previewButton.setTextColor(ContextCompat.getColor(context, R.color.colorGreyDisable))
+                }
+                else -> {
+                    val drawableLeft = ContextCompat.getDrawable(context, R.drawable.ic_arrow_left)
+                    val drawableRight = ContextCompat.getDrawable(context, R.drawable.ic_arrow_right)
+
+                    previewButton.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, null, null)
+                    nextButton.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableRight, null)
+
+                    previewButton.setTextColor(ContextCompat.getColor(context, colorControlNormal))
+                    nextButton.setTextColor(ContextCompat.getColor(context, colorControlNormal))
+                }
+            }
+        }
     }
 
     init {
         LayoutInflater.from(context).inflate(R.layout.custom_recycler_view, this, true)
 
         attrs?.let {
-            //TODO set default
-//            val typedArray = context.obtainStyledAttributes(it, R.styleable.CustomRecyclerView, 0, 0)
-//
-//            val isBottomNavigationVisible = resources.getBoolean(typedArray.getResourceId(R.styleable.CustomRecyclerView_isNavigationVisible, 1))
-//
-//            if (isBottomNavigationVisible) {
-//                view.visibilityGroup.visibility = View.VISIBLE
-//                view.guideline.setGuidelinePercent(0.93f)
-//            } else {
-//                view.visibilityGroup.visibility = View.INVISIBLE
-//                view.guideline.setGuidelinePercent(1f)
-//            }
-//
-//
-//            typedArray.recycle()
+            val attributes = context.obtainStyledAttributes(it, R.styleable.PagingRecyclerView, 0, 0)
+
+            val isBottomNavigationVisible = attributes.getBoolean(R.styleable.PagingRecyclerView_isNavigationVisible, true)
+            toggleBottomNavigation(isBottomNavigationVisible)
+
+
+            attributes.recycle()
         }
 
         prepareListeners()
+        prepareNormalColor()
+    }
 
+    private fun prepareNormalColor() {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
+        this.colorControlNormal = typedValue.resourceId
+    }
+
+    private fun toggleBottomNavigation(isVisible: Boolean) {
+        if (isVisible) {
+            visibilityGroup.visibility = View.VISIBLE
+            guideline.setGuidelinePercent(0.93f)
+        } else {
+            visibilityGroup.visibility = View.GONE
+            guideline.setGuidelinePercent(1f)
+        }
     }
 
     fun setLayoutManager(layoutManager: CustomLayoutManager, itemInColumn: Int = 3) {
@@ -82,8 +118,12 @@ class PagingRecyclerView @JvmOverloads constructor(
     }
 
     private fun prepareListeners() {
-        previewButton.setOnClickListener { adapter?.showPreviewPage() }
-        nextButton.setOnClickListener { adapter?.showNextPage() }
+        previewButton.setOnClickListener {
+            adapter?.showPreviewPage()
+        }
+        nextButton.setOnClickListener {
+            adapter?.showNextPage()
+        }
 
         recyclerView
     }

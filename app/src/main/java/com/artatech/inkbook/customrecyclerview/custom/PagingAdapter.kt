@@ -10,7 +10,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
     RecyclerView.Adapter<VH>(), GeneralAdapterListener, Filterable {
 
     private var pagingRecyclerView: PagingRecyclerView? = null
-    private var listener: Listener? = null
+    private var listener: PagingListener? = null
     private val itemsPerPage by lazy { mutableListOf<T>() }
     private val allItems by lazy { mutableListOf<T>() }
     private val filteredAllItems by lazy { mutableListOf<T>() }
@@ -20,7 +20,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
 
     private var onNothingFound: (() -> Unit)? = null
 
-    fun setItems(items: List<T>, listener: Listener? = null) {
+    fun setItems(items: List<T>, listener: PagingListener? = null) {
         this.listener = listener
         setListener(listener)
 
@@ -41,6 +41,8 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
         itemsPerPage.addAll(calculatedPages.first())
         currentPageIndex = 1
         lastPageIndex = pageList.size
+
+        this.listener?.toggleButtons(currentPageIndex, lastPageIndex)
         this.listener?.updatePageInfo(currentPageIndex, lastPageIndex)
 
         notifyDataSetChanged()
@@ -56,8 +58,6 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
 
     override fun update() {
         val itemPerPage = calculateItemPerPage()
-        //TODO fix it
-//        val calculatedPages = CalculatePage.calculatePages(allItems as ArrayList<T>, itemPerPage)
         val calculatedPages = CalculatePage.calculatePages(filteredAllItems as ArrayList<T>, itemPerPage)
 
         pageList.clear()
@@ -77,6 +77,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
 
             reload(currentPageIndex)
 
+            this.listener?.toggleButtons(currentPageIndex, lastPageIndex)
             notifyDataSetChanged()
         } else {
             Log.d("ANDRII", "It's last page!")
@@ -88,6 +89,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
             currentPageIndex--
             reload(currentPageIndex)
 
+            this.listener?.toggleButtons(currentPageIndex, lastPageIndex)
             notifyDataSetChanged()
         } else {
             Log.d("ANDRII", "It's first page!")
@@ -118,7 +120,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
         this.pagingRecyclerView = pagingRecyclerView
     }
 
-    private fun setListener(listener: Listener?) {
+    private fun setListener(listener: PagingListener?) {
         if (listener != null) {
             this.listener = listener
         } else {
@@ -162,7 +164,9 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
         abstract fun bind(model: T, position: Int)
     }
 
-    interface Listener {
+    interface PagingListener {
         fun updatePageInfo(currentPage: Int, totalPage: Int)
+        fun toggleButtons(currentPage: Int, lastPage: Int)
+
     }
 }

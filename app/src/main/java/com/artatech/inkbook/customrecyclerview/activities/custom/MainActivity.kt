@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.widget.SearchView
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
+import com.artatech.inkbook.customrecyclerview.custom.PagingAdapter
 import com.artatech.inkbook.customrecyclerview.custom.PagingRecyclerView
 import com.artatech.inkbook.customrecyclerview.custom.SpacingItemDecoration
 import kotlinx.android.synthetic.main.main_activity.*
@@ -51,6 +52,9 @@ class MainActivity : AppCompatActivity() {
                 setLinearLayoutManager()
             }
         }
+
+        preview.setOnClickListener { adapter.showPreviewPage() }
+        next.setOnClickListener { adapter.showNextPage() }
     }
 
     private fun setLinearLayoutManager() {
