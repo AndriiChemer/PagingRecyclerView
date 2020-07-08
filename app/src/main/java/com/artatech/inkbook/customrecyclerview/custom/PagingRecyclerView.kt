@@ -1,5 +1,6 @@
 package com.artatech.inkbook.customrecyclerview.custom
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -23,11 +24,12 @@ class PagingRecyclerView @JvmOverloads constructor(
 //        defStyleRes: Int)
 //            : super(context, attrs, defStyleAttr, defStyleRes)
 
-    private var adapter: PagingAdapter? = null
+    private var adapter: GeneralAdapterListener? = null
 
     val listener = object : PagingAdapter.Listener {
-        override fun reloadPageInfo(info: String) {
-            currentPageTextView.text = info
+        @SuppressLint("SetTextI18n")
+        override fun updatePageInfo(currentPage: Int, totalPage: Int) {
+            currentPageTextView.text = "$currentPage/$totalPage"
         }
 
     }
@@ -66,12 +68,12 @@ class PagingRecyclerView @JvmOverloads constructor(
         return (recyclerView.layoutManager as CustomLayoutManager).getViewType()
     }
 
-    fun setAdapter(adapter: PagingAdapter) {
+    fun setAdapter(adapter: GeneralAdapterListener) {
         adapter.update()
         this.adapter = adapter
 
         adapter.setRecyclerView(this)
-        recyclerView.adapter = adapter
+        recyclerView.adapter = adapter as PagingAdapter<*, *>
 
     }
 
@@ -82,13 +84,15 @@ class PagingRecyclerView @JvmOverloads constructor(
     private fun prepareListeners() {
         previewButton.setOnClickListener { adapter?.showPreviewPage() }
         nextButton.setOnClickListener { adapter?.showNextPage() }
+
+        recyclerView
     }
 
     fun isListMode(): Boolean {
         return getLayoutManagerViewType() == CustomLayoutManager.LAYOUT_MANAGER_LIST
     }
 
-    fun addItemDecoration(itemDecoration: RecyclerView.ItemDecoration) {
+    fun setItemDecoration(itemDecoration: RecyclerView.ItemDecoration) {
         if (recyclerView.itemDecorationCount == 0) {
             recyclerView.addItemDecoration(itemDecoration)
         } else if(recyclerView.itemDecorationCount == 1) {

@@ -1,14 +1,12 @@
 package com.artatech.inkbook.customrecyclerview.custom
 
-import com.artatech.inkbook.customrecyclerview.MainModel
-
 class CalculatePage {
     companion object {
-        fun calculatePages(items: ArrayList<MainModel>, itemPerPage: Int = 3): ArrayList<ArrayList<MainModel>> {
+        fun <T> calculatePages(items: ArrayList<T>, itemPerPage: Int = 3): ArrayList<ArrayList<T>> {
             val itemsLength = items.size
-            val pageList = ArrayList<ArrayList<MainModel>>()
+            val pageList = ArrayList<ArrayList<T>>()
 
-            var page: ArrayList<MainModel> = ArrayList()
+            var page: ArrayList<T> = ArrayList()
             var index = 1
 
             for (item in items) {

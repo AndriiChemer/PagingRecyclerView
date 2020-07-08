@@ -6,14 +6,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
-import com.artatech.inkbook.customrecyclerview.custom.PagingAdapter
 import com.artatech.inkbook.customrecyclerview.custom.PagingRecyclerView
 import com.artatech.inkbook.customrecyclerview.custom.SpacingItemDecoration
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val adapter = PagingAdapter()
+    private val adapter = MainAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         customRecyclerView.setLayoutManager(layoutManager,3)
         customRecyclerView.setAdapter(adapter)
-        customRecyclerView.addItemDecoration(itemDecoration)
+        customRecyclerView.setItemDecoration(itemDecoration)
 
     }
 
@@ -59,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         customRecyclerView.setLayoutManager(layoutManager,2)
         customRecyclerView.setAdapter(adapter)
-        customRecyclerView.addItemDecoration(itemDecoration)
+        customRecyclerView.setItemDecoration(itemDecoration)
     }
 
     private fun prepareListItem(): List<MainModel> {
