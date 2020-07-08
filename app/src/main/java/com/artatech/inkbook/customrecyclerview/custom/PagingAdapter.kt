@@ -2,17 +2,23 @@ package com.artatech.inkbook.customrecyclerview.custom
 
 import android.util.Log
 import android.view.View
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 
-abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> : RecyclerView.Adapter<VH>(), GeneralAdapterListener {
+abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
+    RecyclerView.Adapter<VH>(), GeneralAdapterListener, Filterable {
 
     private var pagingRecyclerView: PagingRecyclerView? = null
     private var listener: Listener? = null
     private val itemsPerPage by lazy { mutableListOf<T>() }
     private val allItems by lazy { mutableListOf<T>() }
+    private val filteredAllItems by lazy { mutableListOf<T>() }
     private var pageList: ArrayList<ArrayList<T>> = ArrayList()
     private var currentPageIndex: Int = -1
     private var lastPageIndex: Int = -1
+
+    private var onNothingFound: (() -> Unit)? = null
 
     fun setItems(items: List<T>, listener: Listener? = null) {
         this.listener = listener
@@ -21,9 +27,11 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> : Rec
         val itemPerPage = calculateItemPerPage()
         if (items.isNotEmpty()) {
             this.allItems.clear()
+            this.filteredAllItems.clear()
         }
 
         this.allItems.addAll(items)
+        this.filteredAllItems.addAll(items)
 
         //Calculate pages
         val calculatedPages = CalculatePage.calculatePages(items as ArrayList<T>, itemPerPage)
@@ -48,7 +56,9 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> : Rec
 
     override fun update() {
         val itemPerPage = calculateItemPerPage()
-        val calculatedPages = CalculatePage.calculatePages(allItems as ArrayList<T>, itemPerPage)
+        //TODO fix it
+//        val calculatedPages = CalculatePage.calculatePages(allItems as ArrayList<T>, itemPerPage)
+        val calculatedPages = CalculatePage.calculatePages(filteredAllItems as ArrayList<T>, itemPerPage)
 
         pageList.clear()
         itemsPerPage.clear()
@@ -116,6 +126,36 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> : Rec
         }
         this.listener?.updatePageInfo(currentPageIndex, lastPageIndex)
     }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+
+            private val filterResults = FilterResults()
+
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                filteredAllItems.clear()
+                if (constraint.isNullOrBlank()) {
+                    filteredAllItems.addAll(allItems)
+                } else {
+                    val searchResults = if (constraint != null) allItems.filter { searchParam(constraint.toString(), it) } else allItems
+                    filteredAllItems.addAll(searchResults)
+                }
+                return filterResults.also {
+                    it.values = filteredAllItems
+                }
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                if (filteredAllItems.isNullOrEmpty())
+                    onNothingFound?.invoke()
+
+                update()
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+    abstract fun searchParam(constraint: String, item: T): Boolean
 
     abstract class PagingMainViewHolder<T>(itemView: View): RecyclerView.ViewHolder(itemView) {
 

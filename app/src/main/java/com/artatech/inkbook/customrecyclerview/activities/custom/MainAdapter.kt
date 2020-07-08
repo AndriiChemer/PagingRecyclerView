@@ -28,6 +28,11 @@ class MainAdapter: PagingAdapter<MainModel, MainAdapter.MainViewHolder>() {
         }
     }
 
+    override fun searchParam(searchParam: String, item: MainModel): Boolean {
+        return item.title.toLowerCase().contains(searchParam.toLowerCase())
+    }
+
+
     class MainViewHolder(itemView: View): PagingMainViewHolder<MainModel>(itemView) {
 
         override fun bind(model: MainModel, position: Int) {

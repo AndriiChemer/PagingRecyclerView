@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.widget.SearchView
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
 import com.artatech.inkbook.customrecyclerview.custom.PagingRecyclerView
@@ -26,6 +27,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareListeners() {
+
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter.filter(newText)
+                return false
+            }
+
+        })
+
         toogleLayoutManagerButton.setOnClickListener {
             if (customRecyclerView.isListMode()) {
                 //set grid
