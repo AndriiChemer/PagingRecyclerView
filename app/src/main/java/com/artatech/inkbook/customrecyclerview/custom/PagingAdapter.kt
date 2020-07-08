@@ -68,6 +68,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
         }
         currentPageIndex = 1
         lastPageIndex = pageList.size
+        this.listener?.toggleButtons(currentPageIndex, lastPageIndex)
         this.listener?.updatePageInfo(currentPageIndex, lastPageIndex)
     }
 

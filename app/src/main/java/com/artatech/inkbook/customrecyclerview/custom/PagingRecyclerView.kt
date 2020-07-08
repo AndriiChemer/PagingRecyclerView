@@ -19,14 +19,6 @@ class PagingRecyclerView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr){
 
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//    constructor(
-//        context: Context,
-//        attrs: AttributeSet?,
-//        defStyleAttr: Int,
-//        defStyleRes: Int)
-//            : super(context, attrs, defStyleAttr, defStyleRes)
-
     private var colorControlNormal: Int = R.color.colorGreyDisable
     private var adapter: GeneralAdapterListener? = null
 
@@ -39,24 +31,16 @@ class PagingRecyclerView @JvmOverloads constructor(
         override fun toggleButtons(currentPage: Int, lastPage: Int) {
             when (currentPage) {
                 lastPage -> {
-                    val drawableRight = ContextCompat.getDrawable(context, R.drawable.ic_arrow_right_disable)
-                    nextButton.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableRight, null)
-                    nextButton.setTextColor(ContextCompat.getColor(context, R.color.colorGreyDisable))
+                    disableNextButton()
+                    enablePreviewButton()
                 }
                 1 -> {
-                    val drawableLeft = ContextCompat.getDrawable(context, R.drawable.ic_arrow_left_disable)
-                    previewButton.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, null, null)
-                    previewButton.setTextColor(ContextCompat.getColor(context, R.color.colorGreyDisable))
+                    disablePreviewButton()
+                    enableNextButton()
                 }
                 else -> {
-                    val drawableLeft = ContextCompat.getDrawable(context, R.drawable.ic_arrow_left)
-                    val drawableRight = ContextCompat.getDrawable(context, R.drawable.ic_arrow_right)
-
-                    previewButton.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, null, null)
-                    nextButton.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableRight, null)
-
-                    previewButton.setTextColor(ContextCompat.getColor(context, colorControlNormal))
-                    nextButton.setTextColor(ContextCompat.getColor(context, colorControlNormal))
+                    enableNextButton()
+                    enablePreviewButton()
                 }
             }
         }
@@ -139,6 +123,30 @@ class PagingRecyclerView @JvmOverloads constructor(
             recyclerView.removeItemDecorationAt(0)
             recyclerView.addItemDecoration(itemDecoration)
         }
+    }
+
+    private fun enableNextButton() {
+        val drawableRight = ContextCompat.getDrawable(context, R.drawable.ic_arrow_right)
+        nextButton.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableRight, null)
+        nextButton.setTextColor(ContextCompat.getColor(context, colorControlNormal))
+    }
+
+    private fun disableNextButton() {
+        val drawableRight = ContextCompat.getDrawable(context, R.drawable.ic_arrow_right_disable)
+        nextButton.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableRight, null)
+        nextButton.setTextColor(ContextCompat.getColor(context, R.color.colorGreyDisable))
+    }
+
+    private fun enablePreviewButton() {
+        val drawableLeft = ContextCompat.getDrawable(context, R.drawable.ic_arrow_left)
+        previewButton.setTextColor(ContextCompat.getColor(context, colorControlNormal))
+        previewButton.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, null, null)
+    }
+
+    private fun disablePreviewButton() {
+        val drawableLeft = ContextCompat.getDrawable(context, R.drawable.ic_arrow_left_disable)
+        previewButton.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, null, null)
+        previewButton.setTextColor(ContextCompat.getColor(context, R.color.colorGreyDisable))
     }
 
     class CustomLayoutManager(context: Context, spanCount: Int = 1) : GridLayoutManager(context, spanCount) {
