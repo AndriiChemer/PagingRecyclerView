@@ -22,7 +22,6 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="horizontal"
-                app:layout_constraintEnd_toStartOf="@+id/searchView"
                 app:layout_constraintStart_toStartOf="parent">
 
                 <ImageView
@@ -45,6 +44,13 @@
                     android:layout_height="40dp"
                     android:src="@drawable/ic_arrow_right" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/inkBookRecyclerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Inkbbok\nRecycler"
+                app:layout_constraintEnd_toStartOf="@+id/searchView"/>
 
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/searchView"

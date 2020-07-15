@@ -1,91 +1,36 @@
-package com.artatech.inkbook.customrecyclerview.activities.custom
+package com.artatech.inkbook.customrecyclerview.activities.inkbook
 
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.appcompat.widget.SearchView
+import androidx.recyclerview.widget.GridLayoutManager
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
-import com.artatech.inkbook.customrecyclerview.activities.inkbook.InkBookActivity
-import com.artatech.inkbook.customrecyclerview.custom.PagingAdapter
-import com.artatech.inkbook.customrecyclerview.custom.PagingRecyclerView
 import com.artatech.inkbook.customrecyclerview.custom.SpacingItemDecoration
-import kotlinx.android.synthetic.main.main_activity.*
+import com.artatech.inkbook.customrecyclerview.inkbookrecycler.InkbookHorizontaltemDecoration
+import kotlinx.android.synthetic.main.activity_ink_book.*
 
-class MainActivity : AppCompatActivity() {
-
-    private val adapter = MainAdapter()
+class InkBookActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
+        setContentView(R.layout.activity_ink_book)
 
-        val layoutManager = PagingRecyclerView.CustomLayoutManager(this)
-        val itemDecoration = SpacingItemDecoration()
+        val inkBookAdapter = InkBookAdapter()
 
-        customRecyclerView.setLayoutManager(layoutManager,3)
-        customRecyclerView.setAdapter(adapter)
-        customRecyclerView.setItemDecoration(itemDecoration)
-//        customRecyclerView.setAdapter(adapter)
-
-
-        adapter.setItems(prepareListItem())
-        prepareListeners()
-    }
-
-    private fun prepareListeners() {
-
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
-                return false
-            }
-
-        })
-
-        toogleLayoutManagerButton.setOnClickListener {
-            if (customRecyclerView.isListMode()) {
-                //set grid
-                toogleLayoutManagerButton.setImageResource(R.drawable.ic_list)
-                setGridLayoutManager()
-            } else {
-                //set list
-                toogleLayoutManagerButton.setImageResource(R.drawable.ic_grid)
-                setLinearLayoutManager()
-            }
+        bookshelfRecyclerView.apply {
+            layoutManager = GridLayoutManager(this@InkBookActivity, 3)
+            adapter = inkBookAdapter
+//            addItemDecoration(InkbookHorizontaltemDecoration())
         }
 
-        inkBookRecyclerButton.setOnClickListener { InkBookActivity.start(this) }
 
-        preview.setOnClickListener { adapter.showPreviewPage() }
-        next.setOnClickListener { adapter.showNextPage() }
-    }
+        inkBookAdapter.setItems(prepareListItem())
 
-    private fun setLinearLayoutManager() {
-        val layoutManager = PagingRecyclerView.CustomLayoutManager(this)
-        val itemDecoration = SpacingItemDecoration()
+        previewButton.setOnClickListener { bookshelfRecyclerView.showPreviewPage() }
+        nextButton.setOnClickListener { bookshelfRecyclerView.showNextPage() }
 
-        customRecyclerView.setLayoutManager(layoutManager,3)
-        customRecyclerView.setAdapter(adapter)
-        customRecyclerView.setItemDecoration(itemDecoration)
-
-    }
-
-    private fun setGridLayoutManager() {
-        val spanCount = 3
-        val spacing = 10 //px
-
-        val layoutManager = PagingRecyclerView.CustomLayoutManager(this, spanCount)
-        val itemDecoration = SpacingItemDecoration(spanCount, spacing)
-
-        customRecyclerView.setLayoutManager(layoutManager,2)
-        customRecyclerView.setAdapter(adapter)
-        customRecyclerView.setItemDecoration(itemDecoration)
     }
 
     private fun prepareListItem(): List<MainModel> {
@@ -149,23 +94,23 @@ class MainActivity : AppCompatActivity() {
                 "Title 12",
                 "Description 9",
                 "https://firebasestorage.googleapis.com/v0/b/cars-2f419.appspot.com/o/cars%2F0%2F0.jpg?alt=media&token=8088ea82-8aca-4e95-a7c6-eeaf3e1df2c1"
-            ),
-            MainModel(
-                "Title 13",
-                "Description 9",
-                "https://firebasestorage.googleapis.com/v0/b/cars-2f419.appspot.com/o/cars%2F0%2F0.jpg?alt=media&token=8088ea82-8aca-4e95-a7c6-eeaf3e1df2c1"
-            ),
-            MainModel(
-                "Title 14",
-                "Description 9",
-                "https://firebasestorage.googleapis.com/v0/b/cars-2f419.appspot.com/o/cars%2F0%2F0.jpg?alt=media&token=8088ea82-8aca-4e95-a7c6-eeaf3e1df2c1"
             )
+//            MainModel(
+//                "Title 13",
+//                "Description 9",
+//                "https://firebasestorage.googleapis.com/v0/b/cars-2f419.appspot.com/o/cars%2F0%2F0.jpg?alt=media&token=8088ea82-8aca-4e95-a7c6-eeaf3e1df2c1"
+//            ),
+//            MainModel(
+//                "Title 14",
+//                "Description 9",
+//                "https://firebasestorage.googleapis.com/v0/b/cars-2f419.appspot.com/o/cars%2F0%2F0.jpg?alt=media&token=8088ea82-8aca-4e95-a7c6-eeaf3e1df2c1"
+//            )
         )
     }
 
     companion object {
         fun start(context: Context) {
-            val intent = Intent(context, MainActivity::class.java)
+            val intent = Intent(context, InkBookActivity::class.java)
             context.startActivity(intent)
         }
     }

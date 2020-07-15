@@ -1,18 +1,22 @@
-package com.artatech.inkbook.customrecyclerview.recycler
+package com.artatech.inkbook.customrecyclerview.inkbookrecycler
+
 
 import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.LinearLayout
-import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.GridLayoutManager
+
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager;
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 
-class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
+class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
     private var mMeasuredPageItems = 0
     private var mMeasuredItemHeigh = 0
     private var mMeasuredItemWidth = 0
@@ -24,10 +28,10 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
     var lastPagePosition : Int = 0
         private set
     private val mOnScrollEventHandler = Runnable {
-        layoutManager?.apply {
+        (layoutManager as LinearLayoutManager).apply {
             val firstIndex = max(0, findFirstCompletelyVisibleItemPosition())
             val lastIndex = max(0, findLastCompletelyVisibleItemPosition())
-            val totalItemCount = ((adapter as PagedListAdapter<*, *>).currentList?.dataSource as BookshelfPageDataSource).totalItemCount
+            val totalItemCount = adapter?.itemCount ?: 0;
 
             pagePosition = firstIndex / mMeasuredPageItems
             lastPagePosition = if (totalItemCount - 1 < mMeasuredPageItems) 0 else (totalItemCount - 1) / mMeasuredPageItems
@@ -36,10 +40,7 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
                 pagePosition = lastPagePosition
             }
 
-            mOnScrollPageListener?.onScrolled(this@BookshelfRecyclerView,  pagePosition + 1, lastPagePosition + 1)
-            ((adapter as PagedListAdapter<*, *>).currentList?.dataSource as BookshelfPageDataSource).offset = firstIndex
-
-            isScrollEnabled = false
+            mOnScrollPageListener?.onScrolled(this@InkBookRecyclerView,  pagePosition + 1, lastPagePosition + 1)
         }
     }
     private val mAdapterObserver = object : AdapterDataObserver() {
@@ -55,19 +56,17 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
 
     private val itemDecortion = object : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: State) {
-
-            //    Log.i("offset","imHereAddingItemsOFfset");
             super.getItemOffsets(outRect, view, parent, state)
 
             removeCallbacks(mOnScrollEventHandler)
             val position = max(0, parent.getChildAdapterPosition(view))
-            val totalItemCount = ((adapter as PagedListAdapter<*, *>).currentList?.dataSource as BookshelfPageDataSource).totalItemCount
+            val totalItemCount = adapter?.itemCount ?: 0;
             val page = if (position < mMeasuredPageItems) 0 else position / mMeasuredPageItems
             var top = 0;
             var bottom = mVerticalDividerHeight
             var left = 0
             var right = 0
-            val spanCount = (parent as BookshelfRecyclerView).layoutManager?.spanCount ?: 1
+            val spanCount =  ((parent as InkBookRecyclerView).layoutManager as? GridLayoutManager)?.spanCount ?: 1;
 
             if (spanCount > 1) {
                 val column = position % spanCount
@@ -80,7 +79,7 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
                     top = mVerticalDividerHeight
                 }
                 if (position == totalItemCount - 1 || (row == 0 && position + spanCount- column > totalItemCount - 1)) {
-                        bottom += abs(row - 1) * mMeasuredItemHeigh + mVerticalDividerHeight
+                    bottom += abs(row - 1) * mMeasuredItemHeigh + mVerticalDividerHeight
                 }
             } else {
                 val lastPageFirstIndex = if (totalItemCount % mMeasuredPageItems == 0) totalItemCount - mMeasuredPageItems  else  (totalItemCount / mMeasuredPageItems) * mMeasuredPageItems
@@ -96,7 +95,15 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
                 }
             }
 
-            outRect.set(left, top, right, bottom)
+
+            val column = position % spanCount
+
+            val newLeft =
+                30 - column * 30 / spanCount // spacing - column * ((1f / spanCount) * spacing)
+            val newRight =
+                (column + 1) * 30 / spanCount
+
+            outRect.set(newLeft, top, newRight, bottom)
 
             postDelayed(mOnScrollEventHandler, 250L)
         }
@@ -117,20 +124,19 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
         addItemDecoration(itemDecortion)
     }
 
-
-
     override fun setLayoutManager(layout: LayoutManager?) {
-        layoutManager?.apply {
-            if (spanCount == (layout as BookshelfLayoutManager?)?.spanCount ?: spanCount) {
-                return
-            }
-        }
-
-        if (layout != null && layout !is BookshelfLayoutManager) {
-            throw IllegalArgumentException("Only layout based on BookshelfLayoutManager is supported.")
-        }
+//        layoutManager?.apply {
+//            if (spanCount == (layout as LayoutManagerr?)?.spanCount ?: spanCount) {
+//                return
+//            }
+//        }
+//
+//        if (layout != null && layout !is LayoutManagerr) {
+//            throw IllegalArgumentException("Only layout based on LayoutManagerr is supported.")
+//        }
 
         super.setLayoutManager(layout)
+
 
         onSizeAvailable { width, height ->
             onMeasureItems()
@@ -144,8 +150,8 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
         addItemDecoration(itemDecortion);
     }
 
-    override fun getLayoutManager(): BookshelfLayoutManager? {
-        return super.getLayoutManager() as BookshelfLayoutManager?
+    override fun getLayoutManager(): LayoutManager? {
+        return super.getLayoutManager() as LayoutManager?
     }
 
     private fun onMeasureItems() {
@@ -155,7 +161,7 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             }
 
-            val itemView = adapter!!.onCreateViewHolder(container, if (it.spanCount == 1) BookshelfPagedListAdapter.ViewType.LIST else BookshelfPagedListAdapter.ViewType.GRID).itemView
+            val itemView = adapter!!.onCreateViewHolder(container, adapter!!.getItemViewType(0)).itemView;
             val parent = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -180,9 +186,9 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
                 totalValue += itemView.measuredWidth
                 ++rowItemsCount
             } while (width - totalValue - itemView.measuredWidth >= 0)
-            mHorizontalDividerHeight = (width - totalValue) / (max(1, rowItemsCount - 1))
+            mHorizontalDividerHeight = (width - totalValue) / (max(1, rowItemsCount - 1)) // TODO - на +
 
-            mMeasuredPageItems *= it.spanCount
+            mMeasuredPageItems *= (layoutManager as? GridLayoutManager)?.spanCount ?: 1;
         }
     }
 
@@ -190,17 +196,23 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
         mOnScrollPageListener = listener
     }
 
+    fun showNextPage() {
+        scrollToPagePosition(pagePosition +1)
+    }
+
+    fun showPreviewPage() {
+        scrollToPagePosition(pagePosition -1)
+    }
+
     fun scrollToPagePosition(position: Int) {
-
-
         if (position in 0..lastPagePosition && position != pagePosition) {
-            val totalItemCount = ((adapter as PagedListAdapter<*, *>).currentList?.dataSource as BookshelfPageDataSource).totalItemCount
+            val totalItemCount = adapter?.itemCount ?: 0;
             var requiredItemPosition = min((position + 1) * mMeasuredPageItems - 1, totalItemCount - 1)
             if (position < pagePosition) {
                 requiredItemPosition = max(position * mMeasuredPageItems, 0)
             }
 
-            layoutManager?.isScrollEnabled = true
+            //layoutManager?.isScrollEnabled = true
 
 
 
@@ -213,7 +225,7 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
                 scrollToPosition(requiredItemPosition);
             }
 
-//            scrollToPagePosition(requiredItemPosition);
+            //scrollToPagePosition(requiredItemPosition);
 
         }
     }
@@ -234,6 +246,17 @@ class BookshelfRecyclerView @JvmOverloads constructor(context: Context, attrs: A
 
 
     companion object {
-        val TAG = BookshelfRecyclerView::class.java.simpleName
+        val TAG = InkBookRecyclerView::class.java.simpleName
     }
+}
+
+fun <T : View> T.onSizeAvailable(function: (width : Int, height : Int) -> Unit) {
+    if (height == 0 || width == 0)
+        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+                function(width, height)
+            }
+        })
+    else function(width, height)
 }

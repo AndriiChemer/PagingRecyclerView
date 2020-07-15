@@ -3,4 +3,9 @@
     <declare-styleable name="PagingRecyclerView">
         <attr name="isNavigationVisible" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="InkBookRecyclerView">
+        <attr name="showCounterView" format="boolean" />
+        <attr name="showDivider" format="boolean" />
+    </declare-styleable>
 </resources>
