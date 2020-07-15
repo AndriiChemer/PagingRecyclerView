@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
 import com.artatech.inkbook.customrecyclerview.custom.PagingAdapter
@@ -35,7 +36,12 @@ class MainAdapter: PagingAdapter<MainModel, MainAdapter.MainViewHolder>() {
 
     class MainViewHolder(itemView: View): PagingMainViewHolder<MainModel>(itemView) {
 
-        override fun bind(model: MainModel, position: Int) {
+        override fun bind(
+            model: MainModel,
+            position: Int,
+            clickListener: PagingClickListener<MainModel>?
+        ) {
+            val container = itemView.findViewById<ConstraintLayout>(R.id.container)
             val imageView = itemView.findViewById<ImageView>(R.id.imageView)
             val title = itemView.findViewById<TextView>(R.id.title)
             val description = itemView.findViewById<TextView>(R.id.description)
@@ -47,6 +53,10 @@ class MainAdapter: PagingAdapter<MainModel, MainAdapter.MainViewHolder>() {
 
             title.text = model.title
             description.text = model.description
+
+            container.setOnClickListener {
+                clickListener?.onItemClick(model, position)
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
@@ -27,10 +28,13 @@ class MainActivity : AppCompatActivity() {
         customRecyclerView.setLayoutManager(layoutManager,3)
         customRecyclerView.setAdapter(adapter)
         customRecyclerView.setItemDecoration(itemDecoration)
-//        customRecyclerView.setAdapter(adapter)
 
 
-        adapter.setItems(prepareListItem())
+        adapter.setItems(prepareListItem(), object : PagingAdapter.PagingClickListener<MainModel> {
+            override fun onItemClick(model: MainModel, index: Int) {
+                Toast.makeText(this@MainActivity, "$index. ${model.title}", Toast.LENGTH_LONG).show()
+            }
+        })
         prepareListeners()
     }
 

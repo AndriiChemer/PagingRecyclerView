@@ -98,12 +98,14 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
             val column = position % spanCount
 
-            val newLeft =
-                30 - column * 30 / spanCount // spacing - column * ((1f / spanCount) * spacing)
-            val newRight =
-                (column + 1) * 30 / spanCount
 
-            outRect.set(newLeft, top, newRight, bottom)
+            // spacing - column * ((1f / spanCount) * spacing)
+//            val newLeft =
+//                30 - column * 30 / spanCount
+//            val newRight =
+//                (column + 1) * 30 / spanCount
+
+            outRect.set(0, top, 0, bottom)
 
             postDelayed(mOnScrollEventHandler, 250L)
         }

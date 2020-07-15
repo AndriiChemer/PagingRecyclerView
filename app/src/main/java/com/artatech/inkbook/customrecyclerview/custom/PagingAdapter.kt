@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
     RecyclerView.Adapter<VH>(), GeneralAdapterListener, Filterable {
 
+    private var clickListener: PagingClickListener<T>? = null
     private var pagingRecyclerView: PagingRecyclerView? = null
     private var listener: PagingListener? = null
     private val itemsPerPage by lazy { mutableListOf<T>() }
@@ -20,7 +21,8 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
 
     private var onNothingFound: (() -> Unit)? = null
 
-    fun setItems(items: List<T>, listener: PagingListener? = null) {
+    fun setItems(items: List<T>, clickListener: PagingClickListener<T>? = null, listener: PagingListener? = null) {
+        this.clickListener = clickListener
         this.listener = listener
         setListener(listener)
 
@@ -114,7 +116,7 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item: T = itemsPerPage[position]
-        holder.bind(item, position)
+        holder.bind(item, position, clickListener)
     }
 
     override fun setRecyclerView(pagingRecyclerView: PagingRecyclerView) {
@@ -162,12 +164,15 @@ abstract class PagingAdapter<T, VH: PagingAdapter.PagingMainViewHolder<T>> :
 
     abstract class PagingMainViewHolder<T>(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-        abstract fun bind(model: T, position: Int)
+        abstract fun bind(model: T, position: Int, clickListener: PagingClickListener<T>?)
     }
 
     interface PagingListener {
         fun updatePageInfo(currentPage: Int, totalPage: Int)
         fun toggleButtons(currentPage: Int, lastPage: Int)
+    }
 
+    interface PagingClickListener<T> {
+        fun onItemClick(model: T, index: Int)
     }
 }
