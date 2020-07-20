@@ -1,4 +1,4 @@
-package com.artatech.inkbook.customrecyclerview.activities.inkbook
+package com.artatech.inkbook.customrecyclerview.activities.maciek
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,39 +9,43 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
-import com.artatech.inkbook.customrecyclerview.custom.SpacingItemDecoration
-import com.artatech.inkbook.customrecyclerview.inkbookrecycler.InkBookRecyclerView
+import com.artatech.inkbook.customrecyclerview.activities.inkbook.InkBookAdapter
 import com.artatech.inkbook.customrecyclerview.inkbookrecycler.InkbookHorizontaltemDecoration
-import kotlinx.android.synthetic.main.activity_ink_book.*
+import com.artatech.inkbook.customrecyclerview.maciek.InkBookRecyclerView2
+import kotlinx.android.synthetic.main.activity_maciek_recycleractivity.*
 
-class InkBookActivity : AppCompatActivity() {
-
+class MaciekRecyclerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_ink_book)
+        setContentView(R.layout.activity_maciek_recycleractivity)
 
         val inkBookAdapter = InkBookAdapter()
 
-        bookshelfRecyclerView.apply {
-            layoutManager = GridLayoutManager(this@InkBookActivity, 3)
+        bookshelfRecyclerView2.apply {
+            layoutManager = GridLayoutManager(this@MaciekRecyclerActivity, 3)
             adapter = inkBookAdapter
-
-//            addItemDecoration(InkbookHorizontaltemDecoration())
+            addItemDecoration(InkbookHorizontaltemDecoration())
         }
-        bookshelfRecyclerView.setOnScrollPageListener(object : InkBookRecyclerView.OnScrollPageListener {
+
+        bookshelfRecyclerView2.setOnScrollPageListener(object :
+            InkBookRecyclerView2.OnScrollPageListener {
             @SuppressLint("SetTextI18n")
-            override fun onScrolled(recyclerView: RecyclerView, page: Int, pageCount: Int) {
-                pageInfo.text = "$page/$pageCount"
+            override fun onPageListener(recyclerView: RecyclerView, page: Int, pageCount: Int) {
+                setText("$page/$pageCount")
             }
         })
 
 
         inkBookAdapter.setItems(prepareListItem())
 
-        previewButton.setOnClickListener { bookshelfRecyclerView.showPreviewPage() }
-        nextButton.setOnClickListener { bookshelfRecyclerView.showNextPage() }
-
+        previewButton.setOnClickListener { bookshelfRecyclerView2.showPreviewPage() }
+        nextButton.setOnClickListener { bookshelfRecyclerView2.showNextPage() }
     }
+
+    private fun setText(s: String) {
+        pageInfo.text = s
+    }
+
 
     private fun prepareListItem(): List<MainModel> {
         return mutableListOf(
@@ -120,7 +124,7 @@ class InkBookActivity : AppCompatActivity() {
 
     companion object {
         fun start(context: Context) {
-            val intent = Intent(context, InkBookActivity::class.java)
+            val intent = Intent(context, MaciekRecyclerActivity::class.java)
             context.startActivity(intent)
         }
     }

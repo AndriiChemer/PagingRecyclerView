@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.inkbook.InkBookActivity"></activity>
+        <activity android:name=".activities.maciek.MaciekRecyclerActivity"></activity>
+        <activity android:name=".activities.inkbook.InkBookActivity" />
         <activity android:name=".activities.custom.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

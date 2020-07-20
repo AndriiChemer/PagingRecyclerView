@@ -3,6 +3,12 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+
+    <color name="half_transparent_dark">#4F858585</color>
+    <color name="half_transparent_white">#4AF5F4F4</color>
+
+    <color name="colorGreyDisable">@color/half_transparent_white</color>
+    <color name="colorGreyEnable">@color/half_transparent_dark</color>
 </resources>
 
 <!--Transparent code-->

@@ -52,6 +52,14 @@
                 android:text="Inkbbok\nRecycler"
                 app:layout_constraintEnd_toStartOf="@+id/searchView"/>
 
+            <Button
+                android:id="@+id/maciekButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Maciek"
+                android:textSize="10dp"
+                app:layout_constraintEnd_toStartOf="@+id/inkBookRecyclerButton"/>
+
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/searchView"
                 android:layout_width="wrap_content"

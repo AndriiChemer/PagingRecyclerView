@@ -9,6 +9,7 @@ import androidx.appcompat.widget.SearchView
 import com.artatech.inkbook.customrecyclerview.MainModel
 import com.artatech.inkbook.customrecyclerview.R
 import com.artatech.inkbook.customrecyclerview.activities.inkbook.InkBookActivity
+import com.artatech.inkbook.customrecyclerview.activities.maciek.MaciekRecyclerActivity
 import com.artatech.inkbook.customrecyclerview.custom.PagingAdapter
 import com.artatech.inkbook.customrecyclerview.custom.PagingRecyclerView
 import com.artatech.inkbook.customrecyclerview.custom.SpacingItemDecoration
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         inkBookRecyclerButton.setOnClickListener { InkBookActivity.start(this) }
+        maciekButton.setOnClickListener { MaciekRecyclerActivity.start(this) }
 
         preview.setOnClickListener { adapter.showPreviewPage() }
         next.setOnClickListener { adapter.showNextPage() }

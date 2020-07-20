@@ -1,28 +1,28 @@
-package com.artatech.inkbook.customrecyclerview.inkbookrecycler
+package com.artatech.inkbook.customrecyclerview.maciek
 
 
 import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.GridLayoutManager
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager;
-import kotlin.math.abs
+import pl.inkcompat.Inkbookrecycler.onSizeAvailable
 import kotlin.math.max
 import kotlin.math.min
 
 
-class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
+class InkBookRecyclerView2 @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
     private var mMeasuredPageItems = 0
     private var mMeasuredItemHeigh = 0
     private var mMeasuredItemWidth = 0
     private var mOnScrollPageListener : OnScrollPageListener? = null
     private var mVerticalDividerHeight = 0
     private var mHorizontalDividerHeight = 0
+
     var pagePosition : Int = 0
         private set
     var lastPagePosition : Int = 0
@@ -41,7 +41,9 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
                 pagePosition = lastPagePosition
             }
 
-            mOnScrollPageListener?.onScrolled(this@InkBookRecyclerView,  pagePosition + 1, lastPagePosition + 1)
+            mOnScrollPageListener?.onPageListener(this@InkBookRecyclerView2,  pagePosition + 1, lastPagePosition + 1)
+
+            (layoutManager as InkBookLayoutManager).isScrollEnabled = false
         }
     }
     private val mAdapterObserver = object : AdapterDataObserver() {
@@ -52,48 +54,40 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     interface OnScrollPageListener {
-        fun onScrolled(recyclerView: RecyclerView, page: Int, pageCount: Int) = Unit
+        fun onPageListener(recyclerView: RecyclerView, page: Int, pageCount: Int) = Unit
     }
 
-    private val itemDecortion = object : RecyclerView.ItemDecoration() {
+    private val itemDecortion = object : ItemDecoration() {
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: State) {
+
             super.getItemOffsets(outRect, view, parent, state)
 
             removeCallbacks(mOnScrollEventHandler)
             val position = max(0, parent.getChildAdapterPosition(view))
             val totalItemCount = adapter?.itemCount ?: 0;
-            val page = if (position < mMeasuredPageItems) 0 else position / mMeasuredPageItems
             var top = 0;
             var bottom = mVerticalDividerHeight
             val left = 0
             val right = 0
-            val spanCount =  ((parent as InkBookRecyclerView).layoutManager as? GridLayoutManager)?.spanCount ?: 1;
+            val spanCount =  ((parent as InkBookRecyclerView2).layoutManager as? GridLayoutManager)?.spanCount ?: 1;
 
-            if (spanCount > 1) {
-                val column = position % spanCount
-                val row =  if ((position - (page * mMeasuredPageItems)) < (mMeasuredPageItems / 2)) 0 else 1
+            val rowsOnPage = mMeasuredPageItems/spanCount;
+            val row = position / spanCount;
+            val lastRow = totalItemCount/ spanCount;
 
-                if (row == 0) {
-                    top = mVerticalDividerHeight
-                }
-                if (position == totalItemCount - 1 || (row == 0 && position + spanCount- column > totalItemCount - 1)) {
-                    bottom += abs(row - 1) * mMeasuredItemHeigh + mVerticalDividerHeight
-                }
-            } else {
-                val lastPageFirstIndex = if (totalItemCount % mMeasuredPageItems == 0) totalItemCount - mMeasuredPageItems  else  (totalItemCount / mMeasuredPageItems) * mMeasuredPageItems
-                val sizeOnPage = if (position < lastPageFirstIndex) mMeasuredPageItems else totalItemCount - lastPageFirstIndex
-                val lastIndexOnPage = (page + 1) * mMeasuredPageItems - 1
-                val firstIndexOnPage = lastIndexOnPage - mMeasuredPageItems + 1
 
-                if (position == firstIndexOnPage) {
+                if (row % rowsOnPage == 0) {
                     top += mVerticalDividerHeight
                 }
-                if (position == totalItemCount - 1) {
-                    bottom += (mMeasuredPageItems - sizeOnPage) * (mMeasuredItemHeigh + mVerticalDividerHeight)
+                if(row == lastRow)
+                {
+                    val numberOfEmptySpacesToBottom = rowsOnPage - (row % rowsOnPage) -1;
+                    bottom =  numberOfEmptySpacesToBottom * (mMeasuredItemHeigh + mVerticalDividerHeight);
                 }
-            }
+
 
             outRect.set(left, top, right, bottom)
+
             postDelayed(mOnScrollEventHandler, 250L)
         }
     }
@@ -101,7 +95,7 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     init {
         setHasFixedSize(true)
 
-        addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        addOnScrollListener(object : OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
@@ -113,8 +107,10 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         addItemDecoration(itemDecortion)
     }
 
+
+
     override fun setLayoutManager(layout: LayoutManager?) {
-        super.setLayoutManager(layout)
+        super.setLayoutManager(InkBookLayoutManager(layout!!, context))
 
         onSizeAvailable { width, height ->
             onMeasureItems()
@@ -164,13 +160,13 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
                 totalValue += itemView.measuredWidth
                 ++rowItemsCount
             } while (width - totalValue - itemView.measuredWidth >= 0)
-            mHorizontalDividerHeight = (width - totalValue) / (max(1, rowItemsCount - 1)) // TODO - на +
+            mHorizontalDividerHeight = (width - totalValue) / (max(1, rowItemsCount - 1))
 
             mMeasuredPageItems *= (layoutManager as? GridLayoutManager)?.spanCount ?: 1;
         }
     }
 
-    fun setOnScrollPageListener(listener: OnScrollPageListener) {
+    fun setOnScrollPageListener(listener : OnScrollPageListener) {
         mOnScrollPageListener = listener
     }
 
@@ -191,17 +187,14 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             }
 
 
-            if((pagePosition== lastPagePosition || pagePosition == lastPagePosition )&&totalItemCount%mMeasuredPageItems!=0)
-            {
-                smoothScrollToPosition(requiredItemPosition)
-            }
-            else
-            {
-                scrollToPosition(requiredItemPosition);
-            }
+            (layoutManager as InkBookLayoutManager).isScrollEnabled = true;
 
-            //scrollToPagePosition(requiredItemPosition);
-
+            if((pagePosition== lastPagePosition  )&&totalItemCount%mMeasuredPageItems!=0) {
+                scrollToPosition(requiredItemPosition)
+            }
+            else {
+                scrollToPosition(requiredItemPosition)
+            }
         }
     }
 
@@ -210,6 +203,7 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         super.setAdapter(adapter)
         adapter?.registerAdapterDataObserver(mAdapterObserver)
     }
+
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -221,17 +215,28 @@ class InkBookRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
 
     companion object {
-        val TAG = InkBookRecyclerView::class.java.simpleName
+        val TAG = InkBookRecyclerView2::class.java.simpleName
     }
 }
 
-fun <T : View> T.onSizeAvailable(function: (width : Int, height : Int) -> Unit) {
-    if (height == 0 || width == 0)
-        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                viewTreeObserver.removeOnGlobalLayoutListener(this)
-                function(width, height)
-            }
-        })
-    else function(width, height)
+
+
+private class InkBookLayoutManager(layoutManager : RecyclerView.LayoutManager, context: Context) : GridLayoutManager(context, layoutManager.getSpanCount()) {
+
+
+    var isScrollEnabled : Boolean = false
+
+    override fun canScrollHorizontally(): Boolean {
+        return isScrollEnabled
+    }
+
+    override fun canScrollVertically(): Boolean {
+        return isScrollEnabled
+    }
+
 }
+
+fun RecyclerView.LayoutManager.getSpanCount() : Int{
+    return  (this as? GridLayoutManager)?.spanCount ?: 1
+}
+
